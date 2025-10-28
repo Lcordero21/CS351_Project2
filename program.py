@@ -16,6 +16,10 @@ def read_graph(file_path: str) -> IGraph:
                 temp_graph.add_edge(highway, origin, destination, distance)
     return temp_graph
 
+def read_vertices_coord(graph: IGraph, file_path: str):
+    """Read the vertices from the file and add the coordinate information to the objects"""
+    raise NotImplementedError
+
 
 def print_dfs(graph: IGraph, start_vertex: IVertex) -> None:
     """
@@ -45,11 +49,6 @@ def print_dfs(graph: IGraph, start_vertex: IVertex) -> None:
 
 
     print(visited)
-
-
-
-
-
 
 def print_bfs(graph: IGraph, start_vertex: IVertex) -> None:
     """
@@ -92,7 +91,7 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
     raise NotImplementedError
 
 
-def print_Astar(graph: IGraph, start_vertex: IVertex, destination: IVertex):
+def print_astar(graph: IGraph, start_vertex: IVertex, destination: IVertex):
     raise NotImplementedError
 
 
