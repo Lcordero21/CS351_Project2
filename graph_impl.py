@@ -87,6 +87,8 @@ class Vertex(IVertex):
         self._visited: bool = False
         self._name: str = name
         self._edges: List[IEdge] = []
+        self._coordinates: Tuple = ()
+        self._h = None
 
     def get_name(self) -> str: 
         """
@@ -139,6 +141,21 @@ class Vertex(IVertex):
             Checks to see the vertex's visited status (a boolean).
         """
         return self._visited
+    #Add comments!!
+    def set_coordinates(self, long, lad) -> None:
+        self._coordinates = (long, lad)
+
+    def get_coordinates(self, long, lad) -> Tuple:
+        return self._coordinates
+    
+    def set_h(self, weight) -> None:
+        self._h = weight
+
+    def get_h(self): 
+        return self._h
+    
+    
+
 
 class Edge(IEdge):
     def __init__(self, name: str, destination: IVertex, weight: float) -> None:
