@@ -142,16 +142,37 @@ class Vertex(IVertex):
         """
         return self._visited
     #Add comments!!
-    def set_coordinates(self, long, lad) -> None:
-        self._coordinates = (long, lad)
+    def set_coordinates(self, lad, long) -> None:
+        """
+        Purpose:
+            Sets the coordinates of the Vertex
+        """
+        self._coordinates = (lad, long)
 
-    def get_coordinates(self, long, lad) -> Tuple:
+    def get_coordinates(self) -> Tuple:
+        """
+        Purpose:
+            Retrieve the coordinates of the vertex.
+        """
         return self._coordinates
     
     def set_h(self, weight) -> None:
+        """
+        Note:
+            Can be set as a float or None
+        Purpose: 
+            To set the h value of the vertex based on the destination
+        
+        """
         self._h = weight
 
     def get_h(self): 
+        """
+        Note:
+            Can return a float or None
+        Purpose: 
+            To retrieve the h value for later calculations or use.    
+        """
         return self._h
     
     

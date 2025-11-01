@@ -23,6 +23,7 @@ def read_vertices_coord(graph: IGraph, file_path: str):
     raise NotImplementedError
 
 def haversine_distance(lat1, lon1, lat2, lon2) -> float:
+   """Will calculate the haversine distance in radians"""
    radius: int = 3959 # Earth's radius in miles
    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
    delta_lat: float = lat2 - lat1
@@ -33,6 +34,19 @@ def haversine_distance(lat1, lon1, lat2, lon2) -> float:
    c: float = 2 * math.asin(math.sqrt(a))
    return radius * c
 
+def set_coords (file_path: str, graph: IGraph, destination: str) -> None: #FINISH
+    """Will read in the file with all the city coordinates to later be used by the 
+    haversine_distance function
+    Complexity: O(n^2)...not the most efficient, sorry"""
+    vertices = graph.get_vertices()
+    dest_name, dest_lat, dest_lon = destination, None, None
+    with open(file_path) as paths:
+        for line in paths:
+            name, latitude, longitude = line.split(",")
+            if name != "vertex":
+                for i in range (vertices):
+                    if vertices[i].get_name() == name:
+                        vertices[i].set_coordinates(latitude, longitude)
 
 def print_dfs(graph: IGraph, start_vertex: IVertex) -> None:
     """
@@ -59,8 +73,6 @@ def print_dfs(graph: IGraph, start_vertex: IVertex) -> None:
             vertex.set_visited(True)
             for edge in vertex.get_edges():
                 stack.append(edge.get_destination())
-
-
     print(visited)
 
 def print_bfs(graph: IGraph, start_vertex: IVertex) -> None:
@@ -95,7 +107,9 @@ def print_bfs(graph: IGraph, start_vertex: IVertex) -> None:
     print(visited)
 
 def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
-    reset_visited (graph.get_vertices())
+
+    reset_visited (graph.get_vertices()) #Resets visited of all vertices
+
     frontier = PriorityQueue() #swap to priority queue (a class ina new file)
     frontier.add_node (start_vertex, start_vertex.get_h()) #fix
     explored = []
@@ -105,11 +119,12 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
     while frontier.get_length() != 0:
         current = frontier.pop_node()
         if current.get_name() == destination.get_name():
-            return explored
+            print (explored)
         explored.append(current.get_name)
+        current.set_visited(True)
         explored_adj_list.add_vertex(current)
 
-    raise NotImplementedError
+    print("Path Not Found")
 
 def print_dijkstra(graph: IGraph, start_vertex:IVertex, destination:IVertex):
     reset_visited (graph.get_vertices())
@@ -142,7 +157,10 @@ def reset_visited(graph) -> None:
 
 
 def main() -> None:
-    graph: IGraph = read_graph("graph.txt")
+    #Read the files
+    graph: IGraph = read_graph("graph_v2.txt")
+
+    # Get starting name
     for i in graph.get_vertices():
         print(i.get_name())
     start_vertex_name: str  = input("Enter the start vertex name: ")
@@ -156,8 +174,32 @@ def main() -> None:
         print("Start vertex not found")
         return
    
+   # Get the destination vertex name
+    for i in graph.get_vertices():
+        print(i.get_name())
+    dest_vertex_name: str = input("Enter the destination vertex name:")
+
+    # Get the destination vertex object
+    dest_vertex:Optional[IVertex] = next((v for v in graph.get_vertices() if v.get_name() == dest_vertex_name), None)
+
+    if dest_vertex is None: 
+        print("Destination vertex not found")
+        return
+    
+    set_coords("vertices_v1.txt", dest_vertex_name) 
+    
+    print("[Greedy Best First Search Algorithm]")
+    print_greedyBFS(graph, start_vertex, dest_vertex)
+
+    print("[Dijkstra Algorithm]")
+    print_dijkstra(graph, start_vertex, dest_vertex)
+
+    print("[A* Algorithm]")
+    print_astar(graph, start_vertex, dest_vertex)
+
     print_bfs(graph, start_vertex)
     print_dfs(graph, start_vertex)
+
 
 
 
