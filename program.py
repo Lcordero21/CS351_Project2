@@ -44,7 +44,7 @@ def set_coords (file_path: str, graph: IGraph, destination: str) -> None: #FINIS
         for line in paths:
             name, latitude, longitude = line.split(",")
             if name != "vertex":
-                for i in range (vertices):
+                for i in range (len(vertices)-1):
                     if vertices[i].get_name() == name:
                         vertices[i].set_coordinates(latitude, longitude)
 
@@ -110,19 +110,31 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
 
     reset_visited (graph.get_vertices()) #Resets visited of all vertices
 
-    frontier = PriorityQueue() #swap to priority queue (a class ina new file)
-    frontier.add_node (start_vertex, start_vertex.get_h()) #fix
+    #This is in a seperate python file I created for this 
+    frontier = PriorityQueue() 
+
+    #The coordinates that will be used to get the haversine distance
+    start_vertex_coords = start_vertex.get_coordinates()
+    dest_vertex_coords = destination.get_coordinates()
+
+    frontier.add_node (start_vertex, haversine_distance(start_vertex_coords[0], start_vertex_coords[1],dest_vertex_coords[0], dest_vertex_coords[1])) #fix
     explored = []
-    explored_adj_list = Graph()
+    parent = {}
 
 
     while frontier.get_length() != 0:
         current = frontier.pop_node()
         if current.get_name() == destination.get_name():
             print (explored)
-        explored.append(current.get_name)
+        explored.append(current)
         current.set_visited(True)
-        explored_adj_list.add_vertex(current)
+        for edge in current.get_edges():
+            neighbour = edge.get_destination()
+            if (neighbour.is_visited() == False) and (neighbour not in frontier.get_queue()):
+                parent[neighbour] = current
+                frontier.add_node(neighbour, ) 
+
+
 
     print("Path Not Found")
 
@@ -186,7 +198,7 @@ def main() -> None:
         print("Destination vertex not found")
         return
     
-    set_coords("vertices_v1.txt", dest_vertex_name) 
+    set_coords("vertices_v1.txt", graph, dest_vertex_name) 
     
     print("[Greedy Best First Search Algorithm]")
     print_greedyBFS(graph, start_vertex, dest_vertex)

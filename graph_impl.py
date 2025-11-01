@@ -88,7 +88,7 @@ class Vertex(IVertex):
         self._name: str = name
         self._edges: List[IEdge] = []
         self._coordinates: Tuple = ()
-        self._h = None
+        self._weight = None
 
     def get_name(self) -> str: 
         """
@@ -141,7 +141,7 @@ class Vertex(IVertex):
             Checks to see the vertex's visited status (a boolean).
         """
         return self._visited
-    #Add comments!!
+    
     def set_coordinates(self, lad, long) -> None:
         """
         Purpose:
@@ -156,24 +156,24 @@ class Vertex(IVertex):
         """
         return self._coordinates
     
-    def set_h(self, weight) -> None:
+    def set_weight(self, weight) -> None:#remove?
         """
         Note:
             Can be set as a float or None
         Purpose: 
-            To set the h value of the vertex based on the destination
+            To set the weight of the vertex (h value typically)
         
         """
-        self._h = weight
+        self._weight = weight
 
-    def get_h(self): 
+    def get_weight(self): #remove?
         """
         Note:
             Can return a float or None
         Purpose: 
-            To retrieve the h value for later calculations or use.    
+            To retrieve the weight for later calculations or use.    
         """
-        return self._h
+        return self._weight
     
     
 
