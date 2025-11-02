@@ -185,7 +185,7 @@ def print_astar(graph: IGraph, start_vertex: IVertex, destination: IVertex):
 
     parent[start_vertex] = None
 
-
+    
 
 
     print("Path Not Found for A-Star")
