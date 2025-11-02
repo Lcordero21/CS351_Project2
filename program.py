@@ -23,6 +23,7 @@ def read_vertices_coord(graph: IGraph, file_path: str):
     raise NotImplementedError
 
 def haversine_distance(lat1, lon1, lat2, lon2) -> float:
+   lat1, lon1,lat2,lon2 = float(lat1), float(lon1), float(lat2), float(lon2)
    """Will calculate the haversine distance in radians"""
    radius: int = 3959 # Earth's radius in miles
    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
@@ -114,40 +115,83 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
     frontier = PriorityQueue() 
 
     #The coordinates that will be used to get the haversine distance
-    start_vertex_coords = start_vertex.get_coordinates()
-    dest_vertex_coords = destination.get_coordinates()
+    start_coords = start_vertex.get_coordinates()
+    dest_coords = destination.get_coordinates()
 
-    frontier.add_node (start_vertex, haversine_distance(start_vertex_coords[0], start_vertex_coords[1],dest_vertex_coords[0], dest_vertex_coords[1])) #fix
+    frontier.add_node (start_vertex, haversine_distance(start_coords[0], start_coords[1],dest_coords[0], dest_coords[1])) 
     explored = []
     parent = {}
+
+    parent[start_vertex] = None
 
 
     while frontier.get_length() != 0:
         current = frontier.pop_node()
         if current.get_name() == destination.get_name():
-            print (explored)
+            print (reconstructPath(parent, current))
         explored.append(current)
         current.set_visited(True)
         for edge in current.get_edges():
             neighbour = edge.get_destination()
             if (neighbour.is_visited() == False) and (neighbour not in frontier.get_queue()):
                 parent[neighbour] = current
-                frontier.add_node(neighbour, ) 
-
-
-
-    print("Path Not Found")
+                neighbour_coords = neighbour.get_coordinates()
+                frontier.add_node(neighbour_coords[0],neighbour_coords[1],dest_coords[0], dest_coords[1]) 
+    print("Path Not Found For Greedy Best First Search")
 
 def print_dijkstra(graph: IGraph, start_vertex:IVertex, destination:IVertex):
     reset_visited (graph.get_vertices())
-    raise NotImplementedError
+
+    frontier = PriorityQueue()
+    frontier.add_node(start_vertex, 0)
+
+    explored = []
+    total_dist = 0
+    parent = {}
+
+    parent[start_vertex] = None
+
+    while frontier.get_length() != 0:
+        current = frontier.pop_node()
+        if current.get_name() == destination.get_name():
+            print (reconstructPath(parent, current))
+        explored.append(current)
+        current.set_visited(True)
+        for edge in current.get_edges():
+            tentative_g = current.get_weight() + total_dist
+            neighbour = edge.get_destination()
+            if neighbour.get_visited() == False:
+                if (neighbour not in frontier.get_queue()) or (tentative_g < neighbour.get_weight()):
+                    neighbour.set_weight(tentative_g)
+                    parent[neighbour] = current
+                    frontier.add_node(neighbour, tentative_g)
+    print("Path Not Found for Dijkstra")
 
 
 def print_astar(graph: IGraph, start_vertex: IVertex, destination: IVertex):
     reset_visited (graph.get_vertices())
-    raise NotImplementedError
 
-def priority_queue(arr, func): #FIX THIS
+    #To get f(start)
+    start_coords = start_vertex.get_coordinates()
+    dest_coords = destination.get_coordinates()
+    g_score_start = 0
+    f_score_start = g_score_start + haversine_distance (start_coords[0], start_coords[1], dest_coords[0], dest_coords[1])
+
+    frontier = PriorityQueue()
+    frontier.add_node(start_vertex, f_score_start)
+
+    explored = []
+    parent = {}
+
+    parent[start_vertex] = None
+
+
+
+
+    print("Path Not Found for A-Star")
+
+##########################################################################################
+def priority_queue(arr, func): #FIX THIS OR DELETE ____________________________________
     new_array = arr
     for i in range(len(new_array)):
         minimum =i
@@ -156,6 +200,14 @@ def priority_queue(arr, func): #FIX THIS
                 minimum = m
         new_array [i], new_array [minimum] = new_array [minimum], new_array [i]
     return new_array
+
+def reconstructPath(parent_path: dict[IVertex,IVertex], end:IVertex) -> list[str]:
+    current = end
+    the_path = []
+    while current != None:
+        the_path.append(parent_path[current].get_name())
+        current = parent_path[current]
+    return the_path
 
 def reset_visited(graph) -> None:
     """
@@ -203,14 +255,14 @@ def main() -> None:
     print("[Greedy Best First Search Algorithm]")
     print_greedyBFS(graph, start_vertex, dest_vertex)
 
-    print("[Dijkstra Algorithm]")
+    """print("[Dijkstra Algorithm]")
     print_dijkstra(graph, start_vertex, dest_vertex)
 
     print("[A* Algorithm]")
     print_astar(graph, start_vertex, dest_vertex)
 
     print_bfs(graph, start_vertex)
-    print_dfs(graph, start_vertex)
+    print_dfs(graph, start_vertex)"""
 
 
 
