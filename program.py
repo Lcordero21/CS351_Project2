@@ -49,67 +49,13 @@ def set_coords (file_path: str, graph: IGraph, destination: str) -> None: #FINIS
                     if vertices[i].get_name() == name:
                         vertices[i].set_coordinates(latitude, longitude)
 
-def print_dfs(graph: IGraph, start_vertex: IVertex) -> None:
-    """
-        Print the DFS traversal of the graph starting from the start vertex (I used the iterative
-        approach)
-    """
-
-
-    reset_visited(graph.get_vertices())
-   
-    stack = []
-    visited = []
-    visited_adj_list = Graph()
-
-
-    stack.append(start_vertex)
-
-
-    while len(stack) != 0:
-        vertex = stack.pop()
-        if vertex.is_visited() is False:
-            visited_adj_list.add_vertex(vertex)
-            visited.append(vertex.get_name())
-            vertex.set_visited(True)
-            for edge in vertex.get_edges():
-                stack.append(edge.get_destination())
-    print(visited)
-
-def print_bfs(graph: IGraph, start_vertex: IVertex) -> None:
-    """
-        Print the BFS traversal of the graph starting from the start vertex (I used the
-        iterative approach)
-    """
-    reset_visited (graph.get_vertices())
-
-
-    queue = []
-    visited = []
-    visited_adj_list = Graph()
-
-
-    queue.append(start_vertex)
-    visited.append (start_vertex.get_name())
-    visited_adj_list.add_vertex(start_vertex)
-    start_vertex.set_visited(True)
-
-    while len(queue) != 0:
-        vertex = queue.pop(0)
-        for edge in vertex.get_edges():
-            dest = edge.get_destination()
-            if dest.is_visited() is False:
-                queue.append(dest)
-                visited_adj_list.add_vertex(dest)
-                visited.append(dest.get_name())
-                dest.set_visited(True)
-
-
-    print(visited)
 
 def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
     """Uses the heuristic value to determine the best path to the goal"""
     reset_visited (graph.get_vertices()) #Resets visited of all vertices
+    vertices_explored=0
+    edges_explored=0
+    total_distance=
 
     #This is in a seperate python file I created for this 
     frontier = PriorityQueue() 
@@ -128,12 +74,15 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
 
     while frontier.get_length() != 0:
         current = frontier.pop_node()
+        total_distance += float(current.get_h())
         if current.get_name() == destination.get_name():
-            return(reconstructPath(parent, current))
+            return(reconstructPath(parent, current),edges_explored, vertices_explored, total_distance)
         current.set_visited(True)
         for edge in current.get_edges():
             neighbour = edge.get_destination()
+            edges_explored += 1
             if (neighbour.is_visited() == False) and (neighbour not in frontier.get_queue()):
+                vertices_explored += 1
                 parent[neighbour] = current
                 neighbour_coords = neighbour.get_coordinates()
                 neighbour.set_h(haversine_distance(neighbour_coords[0],neighbour_coords[1],dest_coords[0], dest_coords[1]))
@@ -143,6 +92,9 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
 def print_dijkstra(graph: IGraph, start_vertex:IVertex, destination:IVertex):
     """Uses the actual distance to determine the best possible path"""
     reset_visited (graph.get_vertices())
+    edges_explored = 0
+    vertices_explored= 0
+    total_distance = 0
 
     frontier = PriorityQueue()
     frontier.add_node(start_vertex, 0)
@@ -154,14 +106,17 @@ def print_dijkstra(graph: IGraph, start_vertex:IVertex, destination:IVertex):
 
     while frontier.get_length() != 0:
         current = frontier.pop_node()
+        total_distance += float(current.get_g())
         if current.get_name() == destination.get_name():
-            return (reconstructPath(parent, current))
+            return (reconstructPath(parent, current),edges_explored, vertices_explored, total_distance)
         current.set_visited(True)
         for edge in current.get_edges():
             tentative_g = float(edge.get_weight()) + current.get_g()
             neighbour = edge.get_destination()
+            edges_explored += 1
             if neighbour.is_visited() == False:
                 if (neighbour not in frontier.get_queue()) or (tentative_g < neighbour.get_g()):
+                    vertices_explored += 1
                     parent[neighbour] = current
                     frontier.add_node(neighbour, tentative_g)
                     neighbour.set_g(tentative_g)
@@ -171,37 +126,56 @@ def print_dijkstra(graph: IGraph, start_vertex:IVertex, destination:IVertex):
 def print_astar(graph: IGraph, start_vertex: IVertex, destination: IVertex):
     """Uses the sum of the heuristic value and actual distance value to determine best possible path"""
     reset_visited (graph.get_vertices())
+    edges_explored = 0
+    vertices_explored = 0
+    total_distance = 0
 
     # To get f(start)
     start_coords = start_vertex.get_coordinates()
     dest_coords = destination.get_coordinates()
+
+    #Setting the start_vertex up
     start_vertex.set_g (0)
     start_vertex.set_h(haversine_distance (start_coords[0], start_coords[1], dest_coords[0], dest_coords[1]))
-    f_score_start = start_vertex.get_g() + start_vertex.get_h()
+    start_vertex.set_f(start_vertex.get_g() + start_vertex.get_h())
 
     # Set Up The Priority Queue
     frontier = PriorityQueue()
-    frontier.add_node(start_vertex, f_score_start)
+    frontier.add_node(start_vertex, float(start_vertex.get_f()))
 
-    explored = []
+    #Parent node stuff
     parent = {}
 
     parent[start_vertex] = None 
 
     while frontier.get_length() != 0:
         current = frontier.pop_node()
+        total_distance += float(current.get_f())
         if current.get_name() == destination.get_name():
-            return (reconstructPath(parent, current))
-        explored.append(current)
+            return (reconstructPath(parent, current),edges_explored, vertices_explored, total_distance)
         current.set_visited(True)
         for edge in current.get_edges():
-            tentative_g = current.get_weight() + edge.get_weight()
+            edges_explored += 1
+            tentative_g = current.get_g() + float(edge.get_weight())
             neighbour = edge.get_destination()
             if neighbour.is_visited() == False:
-                if (neighbour not in frontier.get_queue()) or (tentative_g < neighbour.get_weight()):
+                vertices_explored += 1
+                if (neighbour not in frontier.get_queue()) or (tentative_g < neighbour.get_g()):
+                    #(There's a lot going on, so I'm going to add comments here):
+
+                    # Set the g-value
                     neighbour.set_g(tentative_g)
+
+                    # Set the h-value
+                    neighbour_coords = neighbour.get_coordinates()
+                    neighbour.set_h(haversine_distance(neighbour_coords[0],neighbour_coords[1],dest_coords[0], dest_coords[1]))
+
+                    # Set the f-value
+                    neighbour.set_f(neighbour.get_g()+neighbour.get_h())
+
+                    #Set the parent and add it to the frontier
                     parent[neighbour] = current
-                    frontier.add_node(neighbour, tentative_g)
+                    frontier.add_node(neighbour, float(neighbour.get_f()))
 
     print("Path Not Found for A-Star")
 
@@ -234,48 +208,65 @@ def reset_visited(graph) -> None:
 
 
 def main() -> None:
-    #Read the files
-    graph: IGraph = read_graph("graph_v2.txt")
+    status = True
+    while status:
+        #Read the files
+        graph: IGraph = read_graph("graph_v2.txt")
 
-    # Get starting name
-    for i in graph.get_vertices():
-        print(i.get_name())
-    start_vertex_name: str  = input("Enter the start vertex name: ")
+        print("Select Pathfinding Algorithm \n 1.Greedy Best First Search\n 2.Dijkstra's Algorithm\n 3.A* Algorithm")
+        choice = input("Your Choice (1-3):")
+
+        if choice not in range (1,4):
+            print("Not a valid option")
+            return
+
+        # Get starting name
+        for i in graph.get_vertices():
+            print(i.get_name())
+        start_vertex_name: str  = input("Enter the start vertex name: ")
 
 
-    # Find the start vertex object
-    start_vertex: Optional[IVertex]= next((v for v in graph.get_vertices() if v.get_name() == start_vertex_name), None)
+        # Find the start vertex object
+        start_vertex: Optional[IVertex]= next((v for v in graph.get_vertices() if v.get_name() == start_vertex_name), None)
 
 
-    if start_vertex is None:
-        print("Start vertex not found")
-        return
-   
-   # Get the destination vertex name
-    for i in graph.get_vertices():
-        print(i.get_name())
-    dest_vertex_name: str = input("Enter the destination vertex name:")
-
-    # Get the destination vertex object
-    dest_vertex:Optional[IVertex] = next((v for v in graph.get_vertices() if v.get_name() == dest_vertex_name), None)
-
-    if dest_vertex is None: 
-        print("Destination vertex not found")
-        return
+        if start_vertex is None:
+            print("Start vertex not found")
+            return
     
-    set_coords("vertices_v1.txt", graph, dest_vertex_name) 
-    
-    print("[Greedy Best First Search Algorithm]")
-    print(print_greedyBFS(graph, start_vertex, dest_vertex))
+    # Get the destination vertex name
+        for i in graph.get_vertices():
+            print(i.get_name())
+        dest_vertex_name: str = input("Enter the destination vertex name:")
 
-    print("[Dijkstra Algorithm]")
-    print(print_dijkstra(graph, start_vertex, dest_vertex))
+        # Get the destination vertex object
+        dest_vertex:Optional[IVertex] = next((v for v in graph.get_vertices() if v.get_name() == dest_vertex_name), None)
 
-    print("[A* Algorithm]")
-    print(print_astar(graph, start_vertex, dest_vertex))
+        if dest_vertex is None: 
+            print("Destination vertex not found")
+            return
+        
+        set_coords("vertices_v1.txt", graph, dest_vertex_name) 
 
-    """print_bfs(graph, start_vertex)
-    print_dfs(graph, start_vertex)"""
+        #There's lots of print statements because I tried to make it look nice...
+        if choice == 1:
+            print("-"*25)
+            print("[Greedy Best First Search Algorithm]")
+            print("Path taken:", print_greedyBFS(graph, start_vertex, dest_vertex))
+            print("-"*25)
+        if choice == 2:
+            print("[Dijkstra Algorithm]")
+            print("Path taken:", print_dijkstra(graph, start_vertex, dest_vertex))
+            print("-"*25)
+        if choice == 3:
+            print("[A* Algorithm]")
+            print("Path taken:", print_astar(graph, start_vertex, dest_vertex))
+            print("-"*25)
+
+        
+
+        """print_bfs(graph, start_vertex)
+        print_dfs(graph, start_vertex)"""
 
 
 

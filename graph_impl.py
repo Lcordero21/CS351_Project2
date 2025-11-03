@@ -90,6 +90,7 @@ class Vertex(IVertex):
         self._coordinates: Tuple = ()
         self._h = None
         self._g = None
+        self._f = None
 
     def get_name(self) -> str: 
         """
@@ -167,7 +168,7 @@ class Vertex(IVertex):
         """
         self._g = weight
 
-    def get_g(self): #remove?
+    def get_g(self): 
         """
         Note:
             Can return a float or None
@@ -177,10 +178,32 @@ class Vertex(IVertex):
         return self._g
     
     def set_h(self, weight) -> None:
+        """
+        Purpose:
+            Set the h value.
+        """
         self._h = weight
 
     def get_h(self):
+        """
+        Purpose:
+            Retrieve the h value of a vertex.
+        """
         return self._h
+    
+    def set_f(self,weight):
+        """
+        Purpose:
+            Set the f value of a vertex.
+        """
+        self._f = weight
+
+    def get_f(self):
+        """
+        Purpose:
+            Return the f value of a vertex.
+        """
+        return self._f
     
     
 
