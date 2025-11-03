@@ -4,6 +4,7 @@ from graph_impl import Graph, Vertex, Edge
 from priority_queue import PriorityQueue
 import copy
 import math
+import time
 
 
 def read_graph(file_path: str) -> IGraph:  
@@ -45,7 +46,7 @@ def set_coords (file_path: str, graph: IGraph, destination: str) -> None: #FINIS
         for line in paths:
             name, latitude, longitude = line.split(",")
             if name != "vertex":
-                for i in range (len(vertices)-1):
+                for i in range (len(vertices)):
                     if vertices[i].get_name() == name:
                         vertices[i].set_coordinates(latitude, longitude)
 
@@ -55,7 +56,7 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
     reset_visited (graph.get_vertices()) #Resets visited of all vertices
     vertices_explored=0
     edges_explored=0
-    total_distance=
+    total_distance=0
 
     #This is in a seperate python file I created for this 
     frontier = PriorityQueue() 
@@ -204,7 +205,14 @@ def reset_visited(graph) -> None:
         vertex.set_g(None)
         vertex.set_h(None)
 
-
+def time_algorithm(algo, graph, start_point, dest_point):
+    """
+    Purpose:
+        Gets the execution time of an algorithm
+    """
+    start = time.time()
+    algo(graph, start_point, dest_point)
+    return time.time() - start
 
 
 def main() -> None:
@@ -216,7 +224,7 @@ def main() -> None:
         print("Select Pathfinding Algorithm \n 1.Greedy Best First Search\n 2.Dijkstra's Algorithm\n 3.A* Algorithm")
         choice = input("Your Choice (1-3):")
 
-        if choice not in range (1,4):
+        if int(choice) >= 4 or int(choice) < 1:
             print("Not a valid option")
             return
 
@@ -249,19 +257,45 @@ def main() -> None:
         set_coords("vertices_v1.txt", graph, dest_vertex_name) 
 
         #There's lots of print statements because I tried to make it look nice...
-        if choice == 1:
+        if choice == "1":
+            path, edges, vertices, total = print_greedyBFS(graph, start_vertex, dest_vertex)
             print("-"*25)
             print("[Greedy Best First Search Algorithm]")
-            print("Path taken:", print_greedyBFS(graph, start_vertex, dest_vertex))
+            print("Path taken:", path)
+            print("Edges Explored:", edges)
+            print("Vertices Explored:", vertices)
+            print("Total Distance:", total, "miles")
+            print("Execution Time:", time_algorithm(print_greedyBFS,graph,start_vertex, dest_vertex))
             print("-"*25)
-        if choice == 2:
+        if choice == "2":
+            path,edges,vertices,total = print_dijkstra(graph, start_vertex, dest_vertex)
             print("[Dijkstra Algorithm]")
-            print("Path taken:", print_dijkstra(graph, start_vertex, dest_vertex))
+            print("Path taken:", path)
+            print("Edges Explored:", edges)
+            print("Vertices Explored:", vertices)
+            print("Total Distance:", total, "miles")
+            print("Execution Time", time_algorithm(print_dijkstra,graph,start_vertex, dest_vertex))
             print("-"*25)
-        if choice == 3:
+        if choice == "3":
+            path,edges,vertices,total = print_astar(graph, start_vertex, dest_vertex)
             print("[A* Algorithm]")
-            print("Path taken:", print_astar(graph, start_vertex, dest_vertex))
+            print("Path taken:", path)
+            print("Edges Explored:", edges)
+            print("Vertices Explored:", vertices)
+            print("Total Distance:", total, "miles")
+            print("Execution Time:",time_algorithm(print_astar,graph,start_vertex,dest_vertex))
             print("-"*25)
+
+        cont = input("Would you like to try another path? (y/n)")
+        if cont =="y":
+            pass
+        elif cont =="n":
+            print("Have a good day!")
+            return
+        else:
+            print("An Error Occured, Not a Valid Answer...")
+            return
+
 
         
 
