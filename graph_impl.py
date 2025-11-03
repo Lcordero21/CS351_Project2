@@ -88,7 +88,8 @@ class Vertex(IVertex):
         self._name: str = name
         self._edges: List[IEdge] = []
         self._coordinates: Tuple = ()
-        self._weight = None
+        self._h = None
+        self._g = None
 
     def get_name(self) -> str: 
         """
@@ -156,24 +157,30 @@ class Vertex(IVertex):
         """
         return self._coordinates
     
-    def set_weight(self, weight) -> None:#remove?
+    def set_g(self, weight) -> None:
         """
         Note:
             Can be set as a float or None
         Purpose: 
-            To set the weight of the vertex (h value typically)
+            To set the weight of the vertex (g or h value typically)
         
         """
-        self._weight = weight
+        self._g = weight
 
-    def get_weight(self): #remove?
+    def get_g(self): #remove?
         """
         Note:
             Can return a float or None
         Purpose: 
             To retrieve the weight for later calculations or use.    
         """
-        return self._weight
+        return self._g
+    
+    def set_h(self, weight) -> None:
+        self._h = weight
+
+    def get_h(self):
+        return self._h
     
     
 
@@ -221,4 +228,4 @@ class Edge(IEdge):
         Purpose:
             Sets the weight of the edge.
         """
-        self._weight = weight
+        self._weight = float(weight)

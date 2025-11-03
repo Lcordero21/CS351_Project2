@@ -108,7 +108,7 @@ def print_bfs(graph: IGraph, start_vertex: IVertex) -> None:
     print(visited)
 
 def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
-
+    """Uses the heuristic value to determine the best path to the goal"""
     reset_visited (graph.get_vertices()) #Resets visited of all vertices
 
     #This is in a seperate python file I created for this 
@@ -118,35 +118,36 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
     start_coords = start_vertex.get_coordinates()
     dest_coords = destination.get_coordinates()
 
-    frontier.add_node (start_vertex, haversine_distance(start_coords[0], start_coords[1],dest_coords[0], dest_coords[1])) 
-    explored = []
+    start_vertex.set_h(haversine_distance(start_coords[0], start_coords[1],dest_coords[0], dest_coords[1]))
+    frontier.add_node(start_vertex, start_vertex.get_h()) 
+
+    #Keeps track of parents
     parent = {}
 
     parent[start_vertex] = None
 
-
     while frontier.get_length() != 0:
         current = frontier.pop_node()
         if current.get_name() == destination.get_name():
-            print (reconstructPath(parent, current))
-        explored.append(current)
+            return(reconstructPath(parent, current))
         current.set_visited(True)
         for edge in current.get_edges():
             neighbour = edge.get_destination()
             if (neighbour.is_visited() == False) and (neighbour not in frontier.get_queue()):
                 parent[neighbour] = current
                 neighbour_coords = neighbour.get_coordinates()
-                frontier.add_node(neighbour_coords[0],neighbour_coords[1],dest_coords[0], dest_coords[1]) 
+                neighbour.set_h(haversine_distance(neighbour_coords[0],neighbour_coords[1],dest_coords[0], dest_coords[1]))
+                frontier.add_node(neighbour,neighbour.get_h()) 
     print("Path Not Found For Greedy Best First Search")
 
 def print_dijkstra(graph: IGraph, start_vertex:IVertex, destination:IVertex):
+    """Uses the actual distance to determine the best possible path"""
     reset_visited (graph.get_vertices())
 
     frontier = PriorityQueue()
     frontier.add_node(start_vertex, 0)
 
-    explored = []
-    total_dist = 0
+    start_vertex.set_g(0)
     parent = {}
 
     parent[start_vertex] = None
@@ -154,68 +155,80 @@ def print_dijkstra(graph: IGraph, start_vertex:IVertex, destination:IVertex):
     while frontier.get_length() != 0:
         current = frontier.pop_node()
         if current.get_name() == destination.get_name():
-            print (reconstructPath(parent, current))
-        explored.append(current)
+            return (reconstructPath(parent, current))
         current.set_visited(True)
         for edge in current.get_edges():
-            tentative_g = current.get_weight() + total_dist
+            tentative_g = float(edge.get_weight()) + current.get_g()
             neighbour = edge.get_destination()
-            if neighbour.get_visited() == False:
-                if (neighbour not in frontier.get_queue()) or (tentative_g < neighbour.get_weight()):
-                    neighbour.set_weight(tentative_g)
+            if neighbour.is_visited() == False:
+                if (neighbour not in frontier.get_queue()) or (tentative_g < neighbour.get_g()):
                     parent[neighbour] = current
                     frontier.add_node(neighbour, tentative_g)
+                    neighbour.set_g(tentative_g)
     print("Path Not Found for Dijkstra")
 
 
 def print_astar(graph: IGraph, start_vertex: IVertex, destination: IVertex):
+    """Uses the sum of the heuristic value and actual distance value to determine best possible path"""
     reset_visited (graph.get_vertices())
 
-    #To get f(start)
+    # To get f(start)
     start_coords = start_vertex.get_coordinates()
     dest_coords = destination.get_coordinates()
-    g_score_start = 0
-    f_score_start = g_score_start + haversine_distance (start_coords[0], start_coords[1], dest_coords[0], dest_coords[1])
+    start_vertex.set_g (0)
+    start_vertex.set_h(haversine_distance (start_coords[0], start_coords[1], dest_coords[0], dest_coords[1]))
+    f_score_start = start_vertex.get_g() + start_vertex.get_h()
 
+    # Set Up The Priority Queue
     frontier = PriorityQueue()
     frontier.add_node(start_vertex, f_score_start)
 
     explored = []
     parent = {}
 
-    parent[start_vertex] = None
+    parent[start_vertex] = None 
 
-    
-
+    while frontier.get_length() != 0:
+        current = frontier.pop_node()
+        if current.get_name() == destination.get_name():
+            return (reconstructPath(parent, current))
+        explored.append(current)
+        current.set_visited(True)
+        for edge in current.get_edges():
+            tentative_g = current.get_weight() + edge.get_weight()
+            neighbour = edge.get_destination()
+            if neighbour.is_visited() == False:
+                if (neighbour not in frontier.get_queue()) or (tentative_g < neighbour.get_weight()):
+                    neighbour.set_g(tentative_g)
+                    parent[neighbour] = current
+                    frontier.add_node(neighbour, tentative_g)
 
     print("Path Not Found for A-Star")
 
-##########################################################################################
-def priority_queue(arr, func): #FIX THIS OR DELETE ____________________________________
-    new_array = arr
-    for i in range(len(new_array)):
-        minimum =i
-        for m in range (i+1,len(new_array)):
-            if new_array[m] < new_array [minimum]:
-                minimum = m
-        new_array [i], new_array [minimum] = new_array [minimum], new_array [i]
-    return new_array
 
 def reconstructPath(parent_path: dict[IVertex,IVertex], end:IVertex) -> list[str]:
+    """
+    Purpose:
+        To reconstruct the path taken to get to the result.
+    """
     current = end
     the_path = []
-    while current != None:
-        the_path.append(parent_path[current].get_name())
+    the_path.append(end.get_name())
+    while parent_path[current] != None:
+        the_path.insert(0,parent_path[current].get_name())
         current = parent_path[current]
+    
     return the_path
 
 def reset_visited(graph) -> None:
     """
     Purpose:
-        Resets all the visited statuses of the each vertex in a graph.
+        Resets all the visited statuses, the g-value, and h-value of the each vertex in a graph.
     """
     for vertex in graph:
         vertex.set_visited(False)
+        vertex.set_g(None)
+        vertex.set_h(None)
 
 
 
@@ -253,15 +266,15 @@ def main() -> None:
     set_coords("vertices_v1.txt", graph, dest_vertex_name) 
     
     print("[Greedy Best First Search Algorithm]")
-    print_greedyBFS(graph, start_vertex, dest_vertex)
+    print(print_greedyBFS(graph, start_vertex, dest_vertex))
 
-    """print("[Dijkstra Algorithm]")
-    print_dijkstra(graph, start_vertex, dest_vertex)
+    print("[Dijkstra Algorithm]")
+    print(print_dijkstra(graph, start_vertex, dest_vertex))
 
     print("[A* Algorithm]")
-    print_astar(graph, start_vertex, dest_vertex)
+    print(print_astar(graph, start_vertex, dest_vertex))
 
-    print_bfs(graph, start_vertex)
+    """print_bfs(graph, start_vertex)
     print_dfs(graph, start_vertex)"""
 
 

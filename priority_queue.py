@@ -8,15 +8,18 @@ class PriorityQueue():
 
     def add_node(self, node: IVertex, weight: float) -> None:
         """ Add a new node in order based on the weight"""
-        for i in range (len(self._queue)-1):
-            if self._queue[i].get_weight() <= weight:
-                self._queue.insert(node)
-                return None
-            self._queue.append(Node(node, weight))
+        if len(self._queue) > 0:
+            for i in range (len(self._queue)-1):
+                if self._queue[i].get_weight() <= weight:
+                    self._queue.insert(i,Node(node,weight))
+                    return None
+        self._queue.append(Node(node, weight))
 
     def pop_node(self) -> IVertex:
         """Pop a node off the queue"""
-        return self._queue.pop()
+        pop = self._queue[len(self._queue)-1].get_node()
+        self._queue.pop()
+        return pop
     
     def get_queue(self) -> list:
         """Get the queue list"""
@@ -36,12 +39,16 @@ class Node():
         """Initializes the node with the node Vertex address and the weight of the node"""
         self._node: IVertex = node
         self._weight:float = weight
+        self._f_weight = None
 
     def set_weight(self, new_weight:float) -> None:
+        """Can be set as any weight (to be used for sorting purposes in queue)"""
         self._weight:float = new_weight
 
     def get_weight(self) -> float:
+        """To retireve the set weight of the Node"""
         return self._weight
     
     def get_node(self) -> IVertex:
+        """To get the actual IVertex node"""
         return self._node
