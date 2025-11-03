@@ -67,6 +67,7 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
 
     start_vertex.set_h(haversine_distance(start_coords[0], start_coords[1],dest_coords[0], dest_coords[1]))
     frontier.add_node(start_vertex, start_vertex.get_h()) 
+    start_vertex.set_g (0)
 
     #Keeps track of parents
     parent = {}
@@ -75,11 +76,12 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
 
     while frontier.get_length() != 0:
         current = frontier.pop_node()
-        total_distance += float(current.get_h())
+        total_distance = float(current.get_g())
         if current.get_name() == destination.get_name():
             return(reconstructPath(parent, current),edges_explored, vertices_explored, total_distance)
         current.set_visited(True)
         for edge in current.get_edges():
+            tentative_g = float(edge.get_weight()) + current.get_g()
             neighbour = edge.get_destination()
             edges_explored += 1
             if (neighbour.is_visited() == False) and (neighbour not in frontier.get_queue()):
@@ -88,6 +90,7 @@ def print_greedyBFS(graph: IGraph, start_vertex:IVertex, destination:IVertex):
                 neighbour_coords = neighbour.get_coordinates()
                 neighbour.set_h(haversine_distance(neighbour_coords[0],neighbour_coords[1],dest_coords[0], dest_coords[1]))
                 frontier.add_node(neighbour,neighbour.get_h()) 
+                neighbour.set_g(tentative_g)
     print("Path Not Found For Greedy Best First Search")
 
 def print_dijkstra(graph: IGraph, start_vertex:IVertex, destination:IVertex):
@@ -107,7 +110,7 @@ def print_dijkstra(graph: IGraph, start_vertex:IVertex, destination:IVertex):
 
     while frontier.get_length() != 0:
         current = frontier.pop_node()
-        total_distance += float(current.get_g())
+        total_distance = float(current.get_g())
         if current.get_name() == destination.get_name():
             return (reconstructPath(parent, current),edges_explored, vertices_explored, total_distance)
         current.set_visited(True)
@@ -151,7 +154,7 @@ def print_astar(graph: IGraph, start_vertex: IVertex, destination: IVertex):
 
     while frontier.get_length() != 0:
         current = frontier.pop_node()
-        total_distance += float(current.get_f())
+        total_distance = float(current.get_g())
         if current.get_name() == destination.get_name():
             return (reconstructPath(parent, current),edges_explored, vertices_explored, total_distance)
         current.set_visited(True)
